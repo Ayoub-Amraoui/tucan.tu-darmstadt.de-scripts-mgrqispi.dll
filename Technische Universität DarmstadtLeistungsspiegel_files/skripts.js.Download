@@ -1,0 +1,222 @@
+﻿$('document').ready( function(e){
+
+	/* Enable JS calendar */
+	$('.img_calendar').css("display", "inline-block");
+
+	/* Sign check */
+	if(typeof activateSignCheck != 'undefined' && activateSignCheck){
+		var allowedChars = /[^\w^\s^ß^Ä^ä^Ö^ö^Ü^ü^<^>^.^,^\-^\+^\?^@^#^?^(^)^;^&^$^!^'^"^\\^\/\*]/;
+	 
+		var oldValue = "";
+		var item =  $('input.char-check');
+		
+		var text1, text2;
+		
+		if (document.documentElement.lang == "de") {
+			text1 = "Bitte beachten Sie, dass nur die folgenden Sonderzeichen erlaubt sind: ßÄäÖöÜü<>.,-+?@#();&$!‘\“/*";
+			text2 = "Der kopierte Text enthält nicht erlaubte Sonderzeichen. Bitte beachten Sie, dass nur die folgenden Sonderzeichen erlaubt sind: ßÄäÖöÜü<>.,-+?@#();&$!‘\“/*";
+		} else {
+			text1 = "Please note, that just the following special characters are allowed: ßÄäÖöÜü<>.,-+?@#();&$!‘\“/*";
+			text2 = "The copied text contains special characters not allowed. Please note, that just the following special characters are allowed: ßÄäÖöÜü<>.,-+?@#();&$!‘\“/*";
+		}
+
+		
+		item.keypress( function(e){
+			if(String.fromCharCode(e.which).search(allowedChars)>=0 && e.which!=''&& e.which!=8)
+			{
+				alert(text1); 
+				return false;
+			}
+		});
+		
+		 item.bind('paste', function(e) {
+			 var self = this;
+			 oldValue = $(self).val();
+			 setTimeout(function(e) {
+				 var newValue = $(self).val();
+				 if( newValue.search(allowedChars)>=0){
+					 alert(text2);
+					 $(self).val(oldValue);   
+					 oldValue = "";
+				 }
+			  }, 0);
+		});
+	}
+});
+
+function dl_popUp(args,wTitle,wWidth,wHeight){ /*--------------------  USED and should be extended to general popUp-Solution ------------*/
+	var requestString = "";
+    var mySplitStringArray = args.split('&amp;'); 
+    var splits = mySplitStringArray.length;   
+     
+    for(var i=0;i<splits;i++){
+    	requestString += mySplitStringArray[i];
+    	if(i<splits-1) requestString +="&";
+	}
+
+	window.open(requestString,wTitle,"width="+wWidth+",height="+wHeight+",dependent=yes,scrollbars=yes,status=yes,resizable=yes"); 
+	return "";
+}
+
+function adjustWidth(){
+	var content_width = document.getElementById('pageContent').offsetWidth;
+	var leftBarWidth = document.getElementById('pageLeft').offsetWidth;
+	var contentContainer_width = leftBarWidth + content_width;
+
+	if(contentContainer_width>1000){
+		document.getElementById('pageContainer').style.width = (contentContainer_width)+"px";
+		document.getElementById('pageContentContainer').style.width = (contentContainer_width)+"px";
+	}
+}
+
+reloadpage = {
+	submitForm:function(formName){
+		/*function to submit a form, without editing the reload params*/
+		var form = document.getElementById(formName);
+		
+		if (form != null)
+		{
+			$('input[name="Refresh"]').prop("disabled",true);
+			$('input[name="Refresh"]').addClass("cnm_disabled");			
+			form.submit();
+		}
+	},
+	
+	createUrlAndReload:function(dispatcher, applicationName, programName, sessionNo, menuId,args){
+		var temp_args;
+		if(args!=''){ temp_args =','+args};
+	
+		$('input[name="Refresh"]').prop("disabled",true);
+		$('input[name="Refresh"]').addClass("cnm_disabled");
+		window.location.href = dispatcher + "?APPNAME=" + applicationName + "&PRGNAME=" + programName + "&ARGUMENTS=-N" + sessionNo + ",-N" + menuId  + temp_args;
+	}
+}
+
+function confirmaction (url,question){
+	ask = confirm(question);
+	if (ask == true) document.location.href = url;
+	else return
+}
+
+function checkform(formId,checkthem,pLang) {
+	if(pLang=='000000000000001')
+	{
+		var txt_missing = " fehlt";
+		var txt_errorOccured = "Folgende Fehler sind aufgetreten";
+	}
+	else
+	{
+		var txt_missing = " is missing";
+		var txt_errorOccured = "Following errors occured";
+	}
+	
+	var loginform = document.getElementById(formId);
+	var focusme = 99;
+	var count = 0;
+	var alertText = txt_errorOccured+":\n\n";
+	var totest = checkthem.split(",");
+
+	for (var i=0;i<totest.length;i++)
+	{
+		totest[i] = totest[i].split(":");
+		if(loginform[totest[i][0]].value == "" || loginform[totest[i][0]].value == loginform[totest[i][0]].placeholder) 
+		{
+			alertText += totest[i][1]+txt_missing+"\n";
+			count++;
+			if (focusme == 99)focusme = i;
+		}
+	}
+	
+	if(count != 0) 
+	{
+		loginform[totest[focusme][0]].focus();
+		alert(alertText);
+		return false;
+	}
+	else 
+	{
+		return true;
+	}
+}
+
+function checkform2(formname,checkthem,errormessage,focus) 
+{
+	var focusme = 99;
+	var count = 0;
+	var emessage = errormessage.split(",");
+	var alertText = emessage[0] +"\n\n";
+	var totest = checkthem.split(",");
+
+	for (var i=0;i<totest.length;i++)
+	{
+		totest[i] = totest[i].split(":");
+		if(document[formname][totest[i][0]].value == "") 
+		{
+            alertText += totest[i][1]+" "+emessage[1]+".\n";
+            count++;
+            if (focusme == 99)focusme = i;
+        }
+    }
+
+	if(count != 0) {if (focus == 1){document[formname][totest[focusme][0]].focus();}
+        alert(alertText);
+        return;
+	}
+	else 
+	{
+		document[formname].submit();
+    }
+
+}
+
+
+/*SECTION HTML5 Bugfixes */
+
+/* START: Barcode generator */
+function generateBarcode(value, btype){
+	if (btype == null || btype == '')	
+		btype = "code128";  /* ean8, ean13, std25, int25, code11, code39, code93, code128, codabar, msi, datamatrix */
+		
+    var renderer = $("input[name=renderer]:checked").val();
+       
+	var quietZone = false;
+	if ($("#quietzone").is(':checked') || $("#quietzone").prop('checked')){
+	  quietZone = true;
+	}
+
+	var settings = {
+		output:renderer,
+		bgColor: $("#bgColor").val(),
+		color: $("#color").val(),
+		barWidth: $("#barWidth").val(),
+		barHeight: $("#barHeight").val(),
+		moduleSize: $("#moduleSize").val(),
+		posX: $("#posX").val(),
+		posY: $("#posY").val(),
+		addQuietZone: $("#quietZoneSize").val()
+	};
+	
+	if ($("#rectangular").is(':checked') || $("#rectangular").prop('checked')){
+		value = {code:value, rect: true};
+	}
+	if (renderer == 'canvas'){
+		clearCanvas();
+		$("#barcodeTarget").hide();
+		$("#canvasTarget").show().barcode(value, btype, settings);
+	} else {
+		$("#canvasTarget").hide();
+		$("#barcodeTarget").html("").show().barcode(value, btype, settings);
+	}
+}
+		  
+function clearCanvas(){
+	var canvas = $('#canvasTarget').get(0);
+	var ctx = canvas.getContext('2d');
+	ctx.lineWidth = 1;
+	ctx.lineCap = 'butt';
+	ctx.fillStyle = '#FFFFFF';
+	ctx.strokeStyle  = '#000000';
+	ctx.clearRect (0, 0, canvas.width, canvas.height);
+	ctx.strokeRect (0, 0, canvas.width, canvas.height);
+}
+/* END: Barcode generator */
